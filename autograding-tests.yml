@@ -1,0 +1,37 @@
+name: Autograding Tests
+on:
+  - push
+  - workflow_dispatch
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up C++ environment
+      run: sudo apt-get install g++
+
+    - name: Compile main.cpp
+      run: g++ -o main main.cpp
+
+    - name: Run main.cpp and check output
+      id: run_test
+      run: |
+        output=$(./main)
+        echo "program-output=$output" >> $GITHUB_ENV
+
+    - name: Check output
+      run: |
+        if [ "$program-output" == "Hola Mundo" ]; then
+          echo "Test passed"
+        else
+          echo "Test failed"
+          exit 1
+        fi
